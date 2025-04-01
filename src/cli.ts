@@ -118,7 +118,7 @@ export async function processCli(args: string[]): Promise<boolean> {
         console.log(
           "or set HARVEST_API_KEY and HARVEST_ACCOUNT_ID environment variables.",
         );
-        if (readline.listenerCount('line') > 0) {
+        if (readline.listenerCount("line") > 0) {
           readline.close();
         }
         return false; // Don't start the server

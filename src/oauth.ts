@@ -113,7 +113,7 @@ export async function startOAuthFlow(
   return new Promise((resolve) => {
     let server: http.Server | null = null;
     const authUrl = new URL(OAUTH_AUTHORIZE_URL);
-    
+
     // Track open connections to close them forcefully if needed
     const connections = new Set<net.Socket>();
 
@@ -226,7 +226,7 @@ export async function startOAuthFlow(
         res.end("Not found");
       }
     });
-    
+
     // Track connections
     server.on("connection", (connection) => {
       connections.add(connection);
