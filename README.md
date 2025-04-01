@@ -17,14 +17,18 @@ A Model Context Protocol (MCP) server for Harvest time tracking that enables AI 
 
 ## Installation
 
-```bash
-npm install -g harvest-mcp
-```
-
-Or use directly with npx:
+This package is not published on npm. To use it, you need to clone the repository and build it locally:
 
 ```bash
-npx harvest-mcp
+# Clone the repository
+git clone https://github.com/talmage89/harvest-mcp.git
+cd harvest-mcp
+
+# Install dependencies
+npm install
+
+# Build the package
+npm run build
 ```
 
 ## Authentication Setup
@@ -34,8 +38,9 @@ You have two options for authenticating with Harvest:
 ### Option 1: OAuth 2.0 Authentication (Recommended)
 
 1. Run the setup command:
+
    ```bash
-   npx harvest-mcp setup
+   npm run setup
    ```
 
 2. The setup process will:
@@ -50,6 +55,7 @@ If you prefer to use a Personal Access Token, you can create one in Harvest:
 1. Go to https://id.getharvest.com/developers
 2. Create a Personal Access Token
 3. Set the following environment variables:
+
    ```
    HARVEST_API_KEY=your_personal_access_token
    HARVEST_ACCOUNT_ID=your_account_id
@@ -67,53 +73,37 @@ If you prefer to use a Personal Access Token, you can create one in Harvest:
 
 ```bash
 # Start the MCP server
-npx harvest-mcp
+npm start
 
 # Set up OAuth authentication
-npx harvest-mcp setup
-
-# Show help
-npx harvest-mcp help
+npm run setup
 ```
 
 ### MCP Configuration
 
-To add this server to your MCP configuration, add the following to your MCP config file:
-
-```json
-"harvest": {
-  "command": "npx",
-  "args": ["harvest-mcp"]
-}
-```
-
-Or with a locally installed package:
+To add this server to your MCP configuration (for example, in Cursor), add the following to your MCP config file:
 
 ```json
 "harvest": {
   "command": "node",
-  "args": ["./node_modules/harvest-mcp/build/index.js"]
+  "args": ["/path/to/harvest-mcp/build/index.js"]
 }
 ```
 
+Make sure to use the absolute path to the `index.js` file.
+
 ## Development
 
-If you want to develop and contribute to the project:
-
-1. Clone this repository
-2. Install dependencies:
-   ```
-   npm install
-   ```
-3. Build the server:
-   ```
-   npm run build
-   ```
-4. Run the development version:
-   ```
-   node build/index.js
-   ```
-
 Development commands:
+
 - `npm run build` - Build the server
 - `npm run format` - Format code using Prettier
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. Make sure you've completed the authentication setup
+2. Check that the .env file is properly configured or environment variables are set
+3. Verify your Harvest account has the necessary permissions
+4. Check the console output for detailed error messages

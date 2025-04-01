@@ -75,7 +75,7 @@ async function main() {
   // Create and start the MCP server
   const server = new McpServer({
     name: "harvest",
-    version: "1.0.0",
+    version: "1.0.0-dev",
   });
 
   // ** tools **

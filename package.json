@@ -1,20 +1,17 @@
 {
   "name": "harvest-mcp",
-  "version": "1.0.1",
+  "version": "1.0.8",
   "description": "Harvest MCP Server for AI assistants to interact with Harvest time tracking",
   "main": "build/index.js",
   "type": "module",
-  "bin": {
-    "harvest-mcp": "./build/index.js"
-  },
+  "private": true,
   "scripts": {
     "build": "tsc",
     "format": "prettier --write ./src",
-    "prepublishOnly": "npm run build"
+    "start": "node build/index.js",
+    "setup": "node build/index.js setup",
+    "help": "node build/index.js help"
   },
-  "files": [
-    "build"
-  ],
   "keywords": [
     "harvest",
     "mcp",
@@ -35,7 +32,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.8.0",
     "dotenv": "^16.4.7",
-    "luxon": "^3.6.1",
+    "luxon": "^3.4.4",
     "open": "^10.1.0",
     "zod": "^3.24.2"
   },

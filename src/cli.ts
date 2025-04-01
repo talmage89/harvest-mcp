@@ -80,11 +80,11 @@ export async function setupCommand(): Promise<void> {
 export function helpCommand(): void {
   console.log("=== Harvest MCP Server ===");
   console.log("Usage:");
-  console.log("  npx harvest-mcp                 Start the MCP server");
+  console.log("  npm start                        Start the MCP server");
   console.log(
-    "  npx harvest-mcp setup           Configure OAuth authentication",
+    "  npm run setup                    Configure OAuth authentication",
   );
-  console.log("  npx harvest-mcp help            Show this help message");
+  console.log("  npm run help                     Show this help message");
   console.log("\nEnvironment Variables:");
   console.log(
     "  HARVEST_API_KEY                 Your Harvest Personal Access Token (alternative to OAuth)",
@@ -114,7 +114,7 @@ export async function processCli(args: string[]): Promise<boolean> {
       // No command or unknown command - continue to server
       if (!isAuthConfigured()) {
         console.log("Authentication not configured. Please run:");
-        console.log("  npx harvest-mcp setup");
+        console.log("  npm run setup");
         console.log(
           "or set HARVEST_API_KEY and HARVEST_ACCOUNT_ID environment variables.",
         );

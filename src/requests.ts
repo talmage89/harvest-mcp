@@ -26,7 +26,7 @@ export async function makeHarvestRequest<T>(
 
   if (!auth) {
     throw new HarvestRequestError(
-      "Authentication not configured. Please run 'npx harvest-mcp setup' or set HARVEST_API_KEY and HARVEST_ACCOUNT_ID environment variables.",
+      "Authentication not configured. Please run 'npm run setup' or set HARVEST_API_KEY and HARVEST_ACCOUNT_ID environment variables.",
       401,
     );
   }
