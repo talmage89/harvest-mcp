@@ -1,4 +1,7 @@
-const USER_AGENT = "timesheet-mcp/1.0 (tbergeson@startstudio.com)";
+import { getAuthDetails } from "./config.js";
+import { ensureValidToken } from "./oauth.js";
+
+const USER_AGENT = "harvest-mcp/1.0";
 const HARVEST_API_BASE = "https://api.harvestapp.com/v2";
 
 export class HarvestRequestError extends Error {
@@ -15,11 +18,24 @@ export async function makeHarvestRequest<T>(
   method: string = "GET",
   body?: any,
 ): Promise<T> {
+  // Ensure we have valid tokens
+  await ensureValidToken();
+
+  // Get auth details from config or env vars
+  const auth = getAuthDetails();
+
+  if (!auth) {
+    throw new HarvestRequestError(
+      "Authentication not configured. Please run 'npx harvest-mcp setup' or set HARVEST_API_KEY and HARVEST_ACCOUNT_ID environment variables.",
+      401,
+    );
+  }
+
   const url = `${HARVEST_API_BASE}/${path}`;
   const headers = {
     "User-Agent": USER_AGENT,
-    Authorization: `Bearer ${process.env.HARVEST_API_KEY}`,
-    "Harvest-Account-ID": process.env.HARVEST_ACCOUNT_ID || "",
+    Authorization: `Bearer ${auth.accessToken}`,
+    "Harvest-Account-ID": auth.accountId,
     "Content-Type": "application/json",
   };
 
@@ -50,6 +66,9 @@ export async function makeHarvestRequest<T>(
       );
     }
   } catch (error) {
+    if (error instanceof HarvestRequestError) {
+      throw error;
+    }
     throw new HarvestRequestError(
       `Error making Harvest request: ${error}`,
       500,

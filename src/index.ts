@@ -1,21 +1,21 @@
+#!/usr/bin/env node
+
 import fs from "fs";
 import path from "path";
 import * as dotenv from "dotenv";
 import { fileURLToPath } from "url";
+import { processCli } from "./cli.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Optional .env file loading
 const envPath = path.resolve(__dirname, "../.env");
-
-if (!fs.existsSync(envPath)) {
-  throw new Error(`.env file not found. Please create one at ${envPath}`);
-}
-
-const result = dotenv.config({ path: envPath });
-
-if (result.error) {
-  throw new Error(`Error loading .env file: ${result.error.message}`);
+if (fs.existsSync(envPath)) {
+  const result = dotenv.config({ path: envPath });
+  if (result.error) {
+    console.error(`Error loading .env file: ${result.error.message}`);
+  }
 }
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -32,13 +32,7 @@ import {
 } from "./api/timeEntries.js";
 import { HarvestRequestError } from "./requests.js";
 
-const server = new McpServer({
-  name: "harvest",
-  version: "1.0.0",
-});
-
 // ** utils **
-
 function formatResponse(content: any, asError = false) {
   return asError
     ? {
@@ -67,52 +61,61 @@ async function callAndReturnFormatted(fn: () => Promise<any>) {
     );
   }
 }
-// ** tools **
-
-// users
-
-server.tool(
-  "get_user",
-  "Get the Harvest user (usually not required, access to Harvest is granted via a Personal Access Token)",
-  {},
-  async () => callAndReturnFormatted(getHarvestUser),
-);
-
-// projects
-
-server.tool(
-  "get_projects",
-  "Get the Harvest project assignments for the current user",
-  {},
-  async () => callAndReturnFormatted(getHarvestProjectAssignments),
-);
-
-// time entries
-
-server.tool(
-  "create_time_entry",
-  "Create a time entry by project and task",
-  createTimeEntrySchema.shape,
-  async (args) => callAndReturnFormatted(() => createTimeEntry(args)),
-);
-
-server.tool(
-  "update_time_entry",
-  "Update a time entry by ID",
-  updateTimeEntrySchema.shape,
-  async (args) => callAndReturnFormatted(() => updateTimeEntry(args)),
-);
-
-server.tool(
-  "delete_time_entry",
-  "Delete a time entry by ID",
-  deleteTimeEntrySchema.shape,
-  async (args) => callAndReturnFormatted(() => deleteTimeEntry(args.id)),
-);
 
 // ** main **
-
 async function main() {
+  // Process CLI commands first
+  const shouldStartServer = await processCli(process.argv);
+
+  if (!shouldStartServer) {
+    return;
+  }
+
+  // Create and start the MCP server
+  const server = new McpServer({
+    name: "harvest",
+    version: "1.0.0",
+  });
+
+  // ** tools **
+  // users
+  server.tool(
+    "get_user",
+    "Get the Harvest user (usually not required, access to Harvest is granted via a Personal Access Token)",
+    {},
+    async () => callAndReturnFormatted(getHarvestUser),
+  );
+
+  // projects
+  server.tool(
+    "get_projects",
+    "Get the Harvest project assignments for the current user",
+    {},
+    async () => callAndReturnFormatted(getHarvestProjectAssignments),
+  );
+
+  // time entries
+  server.tool(
+    "create_time_entry",
+    "Create a time entry by project and task",
+    createTimeEntrySchema.shape,
+    async (args) => callAndReturnFormatted(() => createTimeEntry(args)),
+  );
+
+  server.tool(
+    "update_time_entry",
+    "Update a time entry by ID",
+    updateTimeEntrySchema.shape,
+    async (args) => callAndReturnFormatted(() => updateTimeEntry(args)),
+  );
+
+  server.tool(
+    "delete_time_entry",
+    "Delete a time entry by ID",
+    deleteTimeEntrySchema.shape,
+    async (args) => callAndReturnFormatted(() => deleteTimeEntry(args.id)),
+  );
+
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("Harvest MCP Server running on stdio");
