@@ -1,6 +1,6 @@
 {
   "name": "harvest-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Harvest MCP Server for AI assistants to interact with Harvest time tracking",
   "main": "build/index.js",
   "type": "module",
