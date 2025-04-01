@@ -1,6 +1,7 @@
 import http from "http";
 import open from "open";
 import { URL } from "url";
+import net from "net";
 import { updateConfig, loadConfig } from "./config.js";
 
 // OAuth endpoints
@@ -112,6 +113,9 @@ export async function startOAuthFlow(
   return new Promise((resolve) => {
     let server: http.Server | null = null;
     const authUrl = new URL(OAUTH_AUTHORIZE_URL);
+    
+    // Track open connections to close them forcefully if needed
+    const connections = new Set<net.Socket>();
 
     const redirectUrl = `http://${DEFAULT_REDIRECT_HOST}:${DEFAULT_REDIRECT_PORT}${DEFAULT_REDIRECT_PATH}`;
 
@@ -119,6 +123,21 @@ export async function startOAuthFlow(
     authUrl.searchParams.set("client_id", clientId);
     authUrl.searchParams.set("response_type", "code");
     authUrl.searchParams.set("redirect_uri", redirectUrl);
+
+    // Function to clean up server and connections
+    const cleanupServer = () => {
+      if (server) {
+        // Destroy all open connections
+        connections.forEach((connection) => {
+          connection.destroy();
+        });
+        connections.clear();
+
+        // Close server
+        server.close();
+        server = null;
+      }
+    };
 
     // Create server to handle OAuth callback
     server = http.createServer(async (req, res) => {
@@ -134,7 +153,7 @@ export async function startOAuthFlow(
           res.end(
             `<html><body><h1>Authentication Error</h1><p>${error}</p><p>Please close this window and try again.</p></body></html>`,
           );
-          server?.close();
+          cleanupServer();
           resolve({ success: false, error });
           return;
         }
@@ -144,7 +163,7 @@ export async function startOAuthFlow(
           res.end(
             "<html><body><h1>Authentication Error</h1><p>No authorization code received.</p><p>Please close this window and try again.</p></body></html>",
           );
-          server?.close();
+          cleanupServer();
           resolve({ success: false, error: "No authorization code received" });
           return;
         }
@@ -166,7 +185,7 @@ export async function startOAuthFlow(
             res.end(
               "<html><body><h1>No Harvest Accounts</h1><p>No Harvest accounts found for this user.</p><p>Please close this window and try again with a different account.</p></body></html>",
             );
-            server?.close();
+            cleanupServer();
             resolve({ success: false, error: "No Harvest accounts found" });
             return;
           }
@@ -188,7 +207,7 @@ export async function startOAuthFlow(
           res.end(
             `<html><body><h1>Authentication Successful</h1><p>You have successfully authenticated with Harvest.</p><p>You are now connected to: ${harvestAccount.name}</p><p>You can close this window and return to the terminal.</p></body></html>`,
           );
-          server?.close();
+          cleanupServer();
           resolve({ success: true });
         } catch (error) {
           console.error("OAuth error:", error);
@@ -196,7 +215,7 @@ export async function startOAuthFlow(
           res.end(
             `<html><body><h1>Authentication Error</h1><p>${error instanceof Error ? error.message : String(error)}</p><p>Please close this window and try again.</p></body></html>`,
           );
-          server?.close();
+          cleanupServer();
           resolve({
             success: false,
             error: error instanceof Error ? error.message : String(error),
@@ -206,6 +225,14 @@ export async function startOAuthFlow(
         res.writeHead(404, { "Content-Type": "text/plain" });
         res.end("Not found");
       }
+    });
+    
+    // Track connections
+    server.on("connection", (connection) => {
+      connections.add(connection);
+      connection.on("close", () => {
+        connections.delete(connection);
+      });
     });
 
     // Start server and open browser
@@ -229,6 +256,7 @@ export async function startOAuthFlow(
     // Handle server errors
     server.on("error", (error) => {
       console.error("Server error:", error);
+      cleanupServer();
       resolve({
         success: false,
         error: error instanceof Error ? error.message : String(error),
@@ -238,10 +266,8 @@ export async function startOAuthFlow(
     // Set timeout
     setTimeout(
       () => {
-        if (server) {
-          server.close();
-          resolve({ success: false, error: "Authentication timed out" });
-        }
+        cleanupServer();
+        resolve({ success: false, error: "Authentication timed out" });
       },
       5 * 60 * 1000,
     ); // 5 minutes timeout
