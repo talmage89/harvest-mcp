@@ -63,7 +63,7 @@ async function callAndReturnFormatted(fn: () => Promise<any>) {
   } catch (error) {
     return formatResponse(
       error instanceof HarvestRequestError ? error.message : String(error),
-      true
+      true,
     );
   }
 }
@@ -75,7 +75,7 @@ server.tool(
   "get_user",
   "Get the Harvest user (usually not required, access to Harvest is granted via a Personal Access Token)",
   {},
-  async () => callAndReturnFormatted(getHarvestUser)
+  async () => callAndReturnFormatted(getHarvestUser),
 );
 
 // projects
@@ -84,7 +84,7 @@ server.tool(
   "get_projects",
   "Get the Harvest project assignments for the current user",
   {},
-  async () => callAndReturnFormatted(getHarvestProjectAssignments)
+  async () => callAndReturnFormatted(getHarvestProjectAssignments),
 );
 
 // time entries
@@ -93,21 +93,21 @@ server.tool(
   "create_time_entry",
   "Create a time entry by project and task",
   createTimeEntrySchema.shape,
-  async (args) => callAndReturnFormatted(() => createTimeEntry(args))
+  async (args) => callAndReturnFormatted(() => createTimeEntry(args)),
 );
 
 server.tool(
   "update_time_entry",
   "Update a time entry by ID",
   updateTimeEntrySchema.shape,
-  async (args) => callAndReturnFormatted(() => updateTimeEntry(args))
+  async (args) => callAndReturnFormatted(() => updateTimeEntry(args)),
 );
 
 server.tool(
   "delete_time_entry",
   "Delete a time entry by ID",
   deleteTimeEntrySchema.shape,
-  async (args) => callAndReturnFormatted(() => deleteTimeEntry(args.id))
+  async (args) => callAndReturnFormatted(() => deleteTimeEntry(args.id)),
 );
 
 // ** main **

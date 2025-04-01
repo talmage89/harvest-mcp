@@ -38,23 +38,9 @@ A Model Context Protocol (MCP) server for Harvest time tracking that enables AI 
    npm run build
    ```
 
-## Running the Server
-
-You can run the server directly:
-
-```
-npm start
-```
-
-Or in development mode with auto-reload:
-
-```
-npm run dev
-```
-
 ## MCP Configuration
 
-To add this server to your MCP configuration, add the following to your `.cursor/mcp.json` file:
+To add this server to your MCP configuration, add the following to your MCP config file:
 
 ```json
 "harvest": {
@@ -63,14 +49,9 @@ To add this server to your MCP configuration, add the following to your `.cursor
 }
 ```
 
-Replace `path/to/timesheet` with the actual path to this repository.
+Replace `absolute/path/to/harvest-mcp/` with the actual absolute path to this repository.
 
 ## Development
 
-- `npm run dev` - Start the server in development mode with auto-reload
 - `npm run build` - Build the server
 - `npm run format` - Format code using Prettier
-
-## License
-
-ISC

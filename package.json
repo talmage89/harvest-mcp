@@ -8,8 +8,6 @@
     "harvest-mcp": "./build/index.js"
   },
   "scripts": {
-    "start": "node build/index.js",
-    "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "format": "prettier --write ./src"
   },
