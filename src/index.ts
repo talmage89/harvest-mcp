@@ -68,6 +68,7 @@ async function main() {
   const shouldStartServer = await processCli(process.argv);
 
   if (!shouldStartServer) {
+    process.exit(0);
     return;
   }
 
